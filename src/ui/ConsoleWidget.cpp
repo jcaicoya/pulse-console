@@ -117,12 +117,6 @@ void ConsoleWidget::keyPressEvent(QKeyEvent* event) {
     // Notify listeners (engine) first.
     emit keyPressed(event->key());
 
-    // Temporary exit shortcuts (dev-only convenience)
-    if (event->key() == Qt::Key_Escape || event->key() == Qt::Key_Q) {
-        close();
-        event->accept();
-        return;
-    }
-
-    QWidget::keyPressEvent(event);
+    // Do NOT close on ESC/Q (stage safety). Only Alt+F4 should close the app.
+    event->accept();
 }

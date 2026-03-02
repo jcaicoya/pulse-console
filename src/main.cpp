@@ -9,7 +9,7 @@ int main(int argc, char* argv[]) {
     QApplication app(argc, argv);
 
     auto* console = new ConsoleWidget();
-    console->setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
+    console->setWindowFlags(Qt::Window | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);
     console->setCursor(Qt::BlankCursor);
     console->setFocusPolicy(Qt::StrongFocus);
 
