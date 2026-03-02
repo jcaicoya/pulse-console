@@ -11,6 +11,10 @@ namespace pc {
         // Loads and parses a YAML script embedded as a Qt resource, e.g. ":/scripts/default.yaml".
         // Throws std::runtime_error on failure.
         static Script loadFromResource(const QString& resourcePath);
+
+        // Loads and parses a YAML script from disk.
+        // Throws std::runtime_error on failure.
+        static Script loadFromFile(const QString& filePath);
     };
 
 } // namespace pc

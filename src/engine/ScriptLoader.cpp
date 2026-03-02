@@ -30,7 +30,7 @@ static AlignV parseAlignV(const std::string& s) {
 }
 
 static QColor parseColor(const std::string& s) {
-    // Expect "#RRGGBB"
+    // Expect "#RRGGBB" (or any Qt-valid color string).
     const QString qs = QString::fromStdString(s);
     if (!QColor::isValidColor(qs)) {
         throw std::runtime_error("Invalid color: " + s + " (expected a Qt-valid color like #RRGGBB)");
@@ -93,7 +93,7 @@ static Step parseOneStep(const YAML::Node& stepNode) {
     }
 
     if (key == "clear") {
-        // We accept: clear: {} or clear: null
+        // Accept: clear: {} or clear: null
         return ClearStep{};
     }
 
@@ -132,15 +132,9 @@ static Step parseOneStep(const YAML::Node& stepNode) {
     throw std::runtime_error("Unknown step type: " + key);
 }
 
-Script ScriptLoader::loadFromResource(const QString& resourcePath) {
-    QFile file(resourcePath);
-    if (!file.open(QIODevice::ReadOnly)) {
-        throw std::runtime_error(("Failed to open resource: " + resourcePath).toStdString());
-    }
-
-    const QByteArray bytes = file.readAll();
+static Script parseFromBytes(const QString& where, const QByteArray& bytes) {
     if (bytes.isEmpty()) {
-        throw std::runtime_error(("Resource is empty: " + resourcePath).toStdString());
+        throw std::runtime_error(("Input is empty: " + where).toStdString());
     }
 
     Script script{};
@@ -160,14 +154,32 @@ Script ScriptLoader::loadFromResource(const QString& resourcePath) {
             script.steps.push_back(parseOneStep(stepNode));
         }
     } catch (const YAML::ParserException& e) {
-        throw makeError(resourcePath, std::string("YAML parse error: ") + e.what());
+        throw makeError(where, std::string("YAML parse error: ") + e.what());
     } catch (const YAML::Exception& e) {
-        throw makeError(resourcePath, std::string("YAML error: ") + e.what());
+        throw makeError(where, std::string("YAML error: ") + e.what());
     } catch (const std::exception& e) {
-        throw makeError(resourcePath, e.what());
+        throw makeError(where, e.what());
     }
 
     return script;
+}
+
+Script ScriptLoader::loadFromResource(const QString& resourcePath) {
+    QFile file(resourcePath);
+    if (!file.open(QIODevice::ReadOnly)) {
+        throw std::runtime_error(("Failed to open resource: " + resourcePath).toStdString());
+    }
+    const QByteArray bytes = file.readAll();
+    return parseFromBytes(resourcePath, bytes);
+}
+
+Script ScriptLoader::loadFromFile(const QString& filePath) {
+    QFile file(filePath);
+    if (!file.open(QIODevice::ReadOnly)) {
+        throw std::runtime_error(("Failed to open file: " + filePath).toStdString());
+    }
+    const QByteArray bytes = file.readAll();
+    return parseFromBytes(filePath, bytes);
 }
 
 } // namespace pc
