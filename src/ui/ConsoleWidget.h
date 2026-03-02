@@ -31,6 +31,9 @@ public:
     void appendText(const QString& text); // Appends to buffer (no newline added)
     void appendLine(const QString& line); // Appends line + '\n'
 
+signals:
+    void keyPressed(int qtKey);
+
 protected:
     void paintEvent(QPaintEvent* event) override;
     void keyPressEvent(QKeyEvent* event) override;

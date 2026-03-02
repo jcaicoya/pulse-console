@@ -28,7 +28,13 @@ add_executable(PulseConsole
         src/main.cpp
         src/ui/ConsoleWidget.cpp
         src/engine/ScriptLoader.cpp
+        src/engine/Engine.cpp
         resources/pulseconsole.qrc
+)
+
+target_include_directories(PulseConsole
+        PRIVATE
+        ${CMAKE_SOURCE_DIR}/src
 )
 
 target_link_libraries(PulseConsole

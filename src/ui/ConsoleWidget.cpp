@@ -114,6 +114,9 @@ void ConsoleWidget::keyPressEvent(QKeyEvent* event) {
         return;
     }
 
+    // Notify listeners (engine) first.
+    emit keyPressed(event->key());
+
     // Temporary exit shortcuts (dev-only convenience)
     if (event->key() == Qt::Key_Escape || event->key() == Qt::Key_Q) {
         close();

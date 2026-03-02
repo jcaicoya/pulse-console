@@ -5,7 +5,9 @@ defaults:
 steps:
   - write: "Hello, World!"
   - wait: 1.0
+  - clear: {}
   - write: "Here we go"
+  - wait: 1.0
   - clear: {}
   - set_style: { color: "#ff0000", size: 50, alignH: center, alignV: middle }
   - write: "Alert!"
