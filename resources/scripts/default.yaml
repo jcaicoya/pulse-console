@@ -1,0 +1,15 @@
+defaults:
+  style: { color: "#00ff00", size: 20, alignH: left, alignV: top }
+  type:  { charDelay: 0.02 }
+
+steps:
+  - write: "Hello, World!"
+  - wait: 1.0
+  - write: "Here we go"
+  - clear: {}
+  - set_style: { color: "#ff0000", size: 50, alignH: center, alignV: middle }
+  - write: "Alert!"
+  - pause_until_key: { key: "Space" }
+  - clear: {}
+  - set_style: { color: "#ffffff", size: 20, alignH: left, alignV: top }
+  - write: "Bye"

@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/">
+        <file>scripts/default.yaml</file>
+    </qresource>
+</RCC>

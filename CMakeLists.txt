@@ -24,7 +24,12 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(yaml_cpp)
 
-add_executable(PulseConsole main.cpp)
+add_executable(PulseConsole
+        src/main.cpp
+        src/ui/ConsoleWidget.cpp
+        resources/pulseconsole.qrc
+)
+
 target_link_libraries(PulseConsole
         Qt::Core
         Qt::Gui
