@@ -1,13 +1,13 @@
-
 #include "ConsoleWidget.h"
 
 #include <QPainter>
 #include <QPaintEvent>
 #include <QFontMetrics>
 
+#include <algorithm>
+
 ConsoleWidget::ConsoleWidget(QWidget* parent)
     : QWidget(parent) {
-    // Console look
     setAutoFillBackground(false);
     setAttribute(Qt::WA_OpaquePaintEvent, true);
     setFocusPolicy(Qt::StrongFocus);
@@ -18,7 +18,8 @@ ConsoleWidget::ConsoleWidget(QWidget* parent)
 }
 
 void ConsoleWidget::clearBuffer() {
-    m_buffer.clear();
+    m_lines.clear();
+    m_currentLine.clear();
     update();
 }
 
@@ -29,19 +30,43 @@ void ConsoleWidget::setStyle(const Style& style) {
 }
 
 void ConsoleWidget::setText(const QString& text) {
-    m_buffer = text;
+    m_lines = text.split('\n');
+    m_currentLine.clear();
+
+    // Trim trailing empty produced by split if text ends with '\n'
+    while (!m_lines.isEmpty() && m_lines.last().isEmpty()) {
+        m_lines.removeLast();
+    }
+
+    // Cap stored lines
+    while (m_lines.size() > m_maxStoredLines) {
+        m_lines.removeFirst();
+    }
+
     update();
 }
 
 void ConsoleWidget::appendText(const QString& text) {
-    m_buffer += text;
+    // Handle embedded newlines so the Engine can do appendText("\n")
+    for (const QChar ch : text) {
+        if (ch == QLatin1Char('\n')) {
+            m_lines.push_back(m_currentLine);
+            m_currentLine.clear();
+
+            while (m_lines.size() > m_maxStoredLines) {
+                m_lines.removeFirst();
+            }
+        } else if (ch != QLatin1Char('\r')) {
+            // Ignore CR to be safe with CRLF inputs
+            m_currentLine += ch;
+        }
+    }
     update();
 }
 
 void ConsoleWidget::appendLine(const QString& line) {
-    m_buffer += line;
-    m_buffer += QLatin1Char('\n');
-    update();
+    appendText(line);
+    appendText("\n");
 }
 
 QRect ConsoleWidget::computeTextRect(const QSize& textSize) const {
@@ -50,30 +75,16 @@ QRect ConsoleWidget::computeTextRect(const QSize& textSize) const {
     int x = area.left();
     int y = area.top();
 
-    // Horizontal alignment
     switch (m_style.alignH) {
-        case AlignH::Left:
-            x = area.left();
-            break;
-        case AlignH::Center:
-            x = area.left() + (area.width() - textSize.width()) / 2;
-            break;
-        case AlignH::Right:
-            x = area.right() - textSize.width();
-            break;
+        case AlignH::Left:   x = area.left(); break;
+        case AlignH::Center: x = area.left() + (area.width() - textSize.width()) / 2; break;
+        case AlignH::Right:  x = area.right() - textSize.width(); break;
     }
 
-    // Vertical alignment
     switch (m_style.alignV) {
-        case AlignV::Top:
-            y = area.top();
-            break;
-        case AlignV::Middle:
-            y = area.top() + (area.height() - textSize.height()) / 2;
-            break;
-        case AlignV::Bottom:
-            y = area.bottom() - textSize.height();
-            break;
+        case AlignV::Top:    y = area.top(); break;
+        case AlignV::Middle: y = area.top() + (area.height() - textSize.height()) / 2; break;
+        case AlignV::Bottom: y = area.bottom() - textSize.height(); break;
     }
 
     return QRect(QPoint(x, y), textSize);
@@ -85,28 +96,48 @@ void ConsoleWidget::paintEvent(QPaintEvent* event) {
     QPainter painter(this);
     painter.setRenderHint(QPainter::TextAntialiasing, true);
 
-    // Background
     painter.fillRect(rect(), Qt::black);
 
     painter.setFont(m_font);
     painter.setPen(m_style.color);
 
-    if (m_buffer.isEmpty()) {
+    const QFontMetrics fm(m_font);
+
+    // How many lines fit?
+    const int lineHeight = std::max(1, fm.height());
+    const int availableHeight = height();
+    const int maxVisibleLines = std::max(1, availableHeight / lineHeight);
+
+    // Build visible lines: last N from m_lines + (optional) currentLine as last
+    QStringList all = m_lines;
+    if (!m_currentLine.isEmpty()) {
+        all.push_back(m_currentLine);
+    }
+
+    if (all.isEmpty()) {
         return;
     }
 
-    // Measure text block size
-    const QFontMetrics fm(m_font);
-    const QRect textBounds = fm.boundingRect(QRect(0, 0, width(), height()),
-                                            Qt::TextWordWrap | Qt::AlignLeft | Qt::AlignTop,
-                                            m_buffer);
+    const qsizetype maxVisible = static_cast<qsizetype>(maxVisibleLines);
+    const qsizetype startIndex = std::max<qsizetype>(0, all.size() - maxVisible);
+    const QStringList visible = all.mid(startIndex);
 
-    const QSize textSize(textBounds.width(), textBounds.height());
+    // Compute text block width (max line width) and height
+    int maxWidth = 0;
+    for (const QString& l : visible) {
+        maxWidth = std::max(maxWidth, fm.horizontalAdvance(l));
+    }
+    const int blockHeight = visible.size() * lineHeight;
+
+    const QSize textSize(maxWidth, blockHeight);
     const QRect targetRect = computeTextRect(textSize);
 
-    painter.drawText(targetRect,
-                     Qt::TextWordWrap | Qt::AlignLeft | Qt::AlignTop,
-                     m_buffer);
+    // Draw line by line for precise spacing (and no word-wrap surprises)
+    int y = targetRect.top() + fm.ascent();
+    for (const QString& l : visible) {
+        painter.drawText(targetRect.left(), y, l);
+        y += lineHeight;
+    }
 }
 
 void ConsoleWidget::keyPressEvent(QKeyEvent* event) {
@@ -114,9 +145,8 @@ void ConsoleWidget::keyPressEvent(QKeyEvent* event) {
         return;
     }
 
-    // Notify listeners (engine) first.
     emit keyPressed(event->key());
 
-    // Do NOT close on ESC/Q (stage safety). Only Alt+F4 should close the app.
+    // Stage safety: do not close on any key. Only Alt+F4 should close the app.
     event->accept();
 }

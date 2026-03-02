@@ -3,6 +3,7 @@
 #include <QColor>
 #include <QFont>
 #include <QString>
+#include <QStringList>
 #include <QWidget>
 #include <QKeyEvent>
 
@@ -27,9 +28,9 @@ public:
     void setStyle(const Style& style);
     const Style& style() const { return m_style; }
 
-    void setText(const QString& text);   // Replaces entire buffer
-    void appendText(const QString& text); // Appends to buffer (no newline added)
-    void appendLine(const QString& line); // Appends line + '\n'
+    void setText(const QString& text);     // Replaces entire buffer (splits into lines)
+    void appendText(const QString& text);  // Appends to current line
+    void appendLine(const QString& line);  // Appends a new line
 
 signals:
     void keyPressed(int qtKey);
@@ -42,6 +43,8 @@ private:
     QRect computeTextRect(const QSize& textSize) const;
 
     Style m_style{};
-    QString m_buffer{};
+    QStringList m_lines{};
+    QString m_currentLine{};
+    int m_maxStoredLines = 2000; // safety cap; tweak later
     QFont m_font{};
 };
