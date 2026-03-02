@@ -1,8 +1,8 @@
 #include <QApplication>
-#include <QFile>
 #include <QDebug>
 
 #include "ui/ConsoleWidget.h"
+#include "engine/ScriptLoader.h"
 
 int main(int argc, char* argv[]) {
     QApplication app(argc, argv);
@@ -13,16 +13,33 @@ int main(int argc, char* argv[]) {
     console->setCursor(Qt::BlankCursor);
     console->setFocusPolicy(Qt::StrongFocus);
 
-    // Optional: ensure it grabs focus (useful for future key handling)
-    console->activateWindow();
-    console->raise();
+    // Load script from Qt resources (YAML).
+    try {
+        const pc::Script script = pc::ScriptLoader::loadFromResource(":/scripts/default.yaml");
+        qDebug() << "PulseConsole: script loaded. steps =" << static_cast<int>(script.steps.size());
 
-    // Temporary resource check (can be removed later)
-    QFile f(":/scripts/default.yaml");
-    qDebug() << "Resource exists:" << f.exists();
+        // For now, just show something so we know rendering works:
+        console->appendLine("PulseConsole");
+        console->appendLine("Script loaded successfully.");
+        console->appendLine(QString("Steps: %1").arg(static_cast<int>(script.steps.size())));
+        console->appendLine("");
+        console->appendLine("Press ESC or Q to exit (temporary).");
+    } catch (const std::exception& e) {
+        qDebug() << "PulseConsole: script load failed:" << e.what();
+        console->appendLine("PulseConsole");
+        console->appendLine("ERROR: Failed to load script.");
+        console->appendLine(QString::fromUtf8(e.what()));
+        console->appendLine("");
+        console->appendLine("Press ESC or Q to exit (temporary).");
+    }
 
     // Show fullscreen for stage use
     console->showFullScreen();
+
+    // Ensure keyboard focus (important for ESC/Q)
+    console->activateWindow();
+    console->raise();
+    console->setFocus();
 
     return app.exec();
 }

@@ -108,3 +108,18 @@ void ConsoleWidget::paintEvent(QPaintEvent* event) {
                      Qt::TextWordWrap | Qt::AlignLeft | Qt::AlignTop,
                      m_buffer);
 }
+
+void ConsoleWidget::keyPressEvent(QKeyEvent* event) {
+    if (!event) {
+        return;
+    }
+
+    // Temporary exit shortcuts (dev-only convenience)
+    if (event->key() == Qt::Key_Escape || event->key() == Qt::Key_Q) {
+        close();
+        event->accept();
+        return;
+    }
+
+    QWidget::keyPressEvent(event);
+}

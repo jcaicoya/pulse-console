@@ -27,6 +27,7 @@ FetchContent_MakeAvailable(yaml_cpp)
 add_executable(PulseConsole
         src/main.cpp
         src/ui/ConsoleWidget.cpp
+        src/engine/ScriptLoader.cpp
         resources/pulseconsole.qrc
 )
 

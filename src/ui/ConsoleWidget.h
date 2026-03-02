@@ -4,6 +4,7 @@
 #include <QFont>
 #include <QString>
 #include <QWidget>
+#include <QKeyEvent>
 
 class ConsoleWidget final : public QWidget {
     Q_OBJECT
@@ -32,11 +33,11 @@ public:
 
 protected:
     void paintEvent(QPaintEvent* event) override;
+    void keyPressEvent(QKeyEvent* event) override;
 
 private:
     QRect computeTextRect(const QSize& textSize) const;
 
-private:
     Style m_style{};
     QString m_buffer{};
     QFont m_font{};
