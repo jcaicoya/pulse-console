@@ -1,5 +1,6 @@
 <RCC>
     <qresource prefix="/">
         <file>scripts/default.yaml</file>
+        <file>scripts/second_screen.yaml</file>
     </qresource>
 </RCC>

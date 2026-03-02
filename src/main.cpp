@@ -27,6 +27,28 @@ static QString getScriptArg(const QStringList& args) {
     return QString();
 }
 
+static QString getResourceArg(const QStringList& args) {
+    // Supported:
+    //   --resource <name>
+    //   --resource=<name>
+    for (int i = 1; i < args.size(); ++i) {
+        const QString a = args[i];
+
+        if (a == "--resource") {
+            if (i + 1 < args.size()) {
+                return args[i + 1];
+            }
+            return QString();
+        }
+
+        const QString prefix = "--resource=";
+        if (a.startsWith(prefix)) {
+            return a.mid(prefix.size());
+        }
+    }
+    return QString();
+}
+
 int main(int argc, char* argv[]) {
     QApplication app(argc, argv);
 
@@ -42,12 +64,17 @@ int main(int argc, char* argv[]) {
 
     const QStringList args = QCoreApplication::arguments();
     const QString scriptPath = getScriptArg(args);
+    const QString resourceName = getResourceArg(args);
 
     pc::Script script;
     try {
         if (!scriptPath.isEmpty()) {
             qDebug() << "PulseConsole: loading script from file:" << scriptPath;
             script = pc::ScriptLoader::loadFromFile(scriptPath);
+        } else if (!resourceName.isEmpty()) {
+            const QString rp = QString(":/scripts/%1").arg(resourceName);
+            qDebug() << "PulseConsole: loading script from resources:" << rp;
+            script = pc::ScriptLoader::loadFromResource(rp);
         } else {
             qDebug() << "PulseConsole: loading default script from resources";
             script = pc::ScriptLoader::loadFromResource(":/scripts/default.yaml");
