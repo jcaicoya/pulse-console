@@ -1,5 +1,5 @@
-cmake_minimum_required(VERSION 3.31)
-project(PulseConsole)
+cmake_minimum_required(VERSION 4.1)
+project(pulse_console)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_AUTOMOC ON)
@@ -38,7 +38,7 @@ target_include_directories(yaml-cpp PUBLIC "${_yaml_src}/include")
 target_compile_definitions(yaml-cpp PUBLIC YAML_CPP_STATIC_DEFINE)
 add_library(yaml-cpp::yaml-cpp ALIAS yaml-cpp)
 
-add_executable(PulseConsole
+add_executable(pulse_console
         src/main.cpp
         src/ui/ConsoleWidget.cpp
         src/engine/ScriptLoader.cpp
@@ -48,13 +48,13 @@ add_executable(PulseConsole
         ../cybershow_app_standards_v0_3/common/CyberAppMode.cpp
 )
 
-target_include_directories(PulseConsole
+target_include_directories(pulse_console
         PRIVATE
         ${CMAKE_SOURCE_DIR}/src
         ${CMAKE_SOURCE_DIR}/../cybershow_app_standards_v0_3/common
 )
 
-target_link_libraries(PulseConsole
+target_link_libraries(pulse_console
         Qt::Core
         Qt::Gui
         Qt::Widgets
