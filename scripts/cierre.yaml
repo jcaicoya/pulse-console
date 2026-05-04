@@ -1,0 +1,21 @@
+defaults:
+  style: { color: "#00ff00", size: 22, alignH: left, alignV: top }
+  type:  { charDelay: 0.03 }
+
+steps:
+  - write: "Finalizando operaciones activas..."
+  - wait: 1.0
+  - write: "Cerrando conexiones remotas..."
+  - wait: 1.2
+  - write: "Borrando rastros de acceso..."
+  - wait: 1.0
+  - write: "Eliminando logs del sistema..."
+  - wait: 1.2
+  - set_style: { color: "#ffaa00", size: 22, alignH: left, alignV: top }
+  - write: "Sistema comprometido: limpieza completada."
+  - wait: 1.0
+  - write: "Desconectando..."
+  - wait: 1.5
+  - clear: {}
+  - set_style: { color: "#ffffff", size: 48, alignH: center, alignV: middle }
+  - write: "Gracias"

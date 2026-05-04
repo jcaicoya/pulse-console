@@ -1,0 +1,26 @@
+defaults:
+  style: { color: "#00ff00", size: 22, alignH: left, alignV: top }
+  type:  { charDelay: 0.03 }
+
+steps:
+  - write: "SISTEMA CUARZOPOLAR v2.4.1"
+  - wait: 0.6
+  - write: "Iniciando módulos de intercepción..."
+  - wait: 1.2
+  - write: "Escaneando redes disponibles en el área..."
+  - wait: 1.5
+  - write: "Dispositivos detectados en rango: 47"
+  - wait: 0.8
+  - write: "Seleccionando objetivos..."
+  - wait: 1.2
+  - set_style: { color: "#ffaa00", size: 22, alignH: left, alignV: top }
+  - write: "ADVERTENCIA: actividad de red inusual detectada"
+  - wait: 1.0
+  - write: "Protocolo de ataque listo."
+  - wait: 0.8
+  - set_style: { color: "#ff4444", size: 22, alignH: left, alignV: top }
+  - write: "INICIANDO SECUENCIA DE INFILTRACIÓN"
+  - wait: 1.0
+  - clear: {}
+  - set_style: { color: "#ff4444", size: 64, alignH: center, alignV: middle }
+  - write: "BAJO ATAQUE"
