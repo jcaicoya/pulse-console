@@ -44,11 +44,14 @@ add_executable(PulseConsole
         src/engine/ScriptLoader.cpp
         src/engine/Engine.cpp
         resources/pulseconsole.qrc
+        ../cybershow_app_standards_v0_3/common/CyberAppMode.h
+        ../cybershow_app_standards_v0_3/common/CyberAppMode.cpp
 )
 
 target_include_directories(PulseConsole
         PRIVATE
         ${CMAKE_SOURCE_DIR}/src
+        ${CMAKE_SOURCE_DIR}/../cybershow_app_standards_v0_3/common
 )
 
 target_link_libraries(PulseConsole

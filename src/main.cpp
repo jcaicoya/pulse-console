@@ -1,89 +1,83 @@
 #include <QApplication>
-#include <QDebug>
+#include <QGuiApplication>
+#include <QScreen>
+#include <QStringList>
+#include <iostream>
 
+#include "CyberAppMode.h"
 #include "ui/ConsoleWidget.h"
 #include "engine/Engine.h"
 #include "engine/ScriptLoader.h"
 
-static QString getScriptArg(const QStringList& args) {
-    // Supported:
-    //   --script <path>
-    //   --script=<path>
-    for (int i = 1; i < args.size(); ++i) {
-        const QString a = args[i];
-
-        if (a == "--script") {
-            if (i + 1 < args.size()) {
-                return args[i + 1];
-            }
-            return QString(); // missing value
-        }
-
-        const QString prefix = "--script=";
-        if (a.startsWith(prefix)) {
-            return a.mid(prefix.size());
-        }
-    }
-    return QString();
-}
-
-static QString getResourceArg(const QStringList& args) {
-    // Supported:
-    //   --resource <name>
-    //   --resource=<name>
-    for (int i = 1; i < args.size(); ++i) {
-        const QString a = args[i];
-
-        if (a == "--resource") {
-            if (i + 1 < args.size()) {
-                return args[i + 1];
-            }
-            return QString();
-        }
-
-        const QString prefix = "--resource=";
-        if (a.startsWith(prefix)) {
-            return a.mid(prefix.size());
-        }
-    }
-    return QString();
-}
-
 int main(int argc, char* argv[]) {
     QApplication app(argc, argv);
+    app.setApplicationName("pulse-console");
+
+    // Extract --file before parseAppLaunchOptions (unknown flags are hard errors).
+    QStringList args = app.arguments();
+    QString scriptFile;
+    for (int i = 1; i < args.size(); ++i) {
+        if (args[i] == "--file" && i + 1 < args.size()) {
+            scriptFile = args[i + 1];
+            args.removeAt(i + 1);
+            args.removeAt(i);
+            break;
+        }
+    }
+
+    // Normalize Orchestrator vocabulary to app vocabulary.
+    for (auto& a : args) {
+        if (a == "--show")   a = "--live";
+        if (a == "--design") a = "--demo";
+    }
+
+    const cybershow::ParseResult parseResult = cybershow::parseAppLaunchOptions(args);
+    if (!parseResult.ok) {
+        std::cerr << "pulse-console: " << parseResult.error.toStdString() << std::endl;
+        return 1;
+    }
+
+    std::cout << "CYBERSHOW_STATUS READY" << std::endl;
+
+    const cybershow::AppLaunchOptions& options = parseResult.options;
+
+    const auto screens = QGuiApplication::screens();
+    QScreen* targetScreen = (options.screenIndex >= 0 && options.screenIndex < screens.size())
+                            ? screens.at(options.screenIndex)
+                            : QGuiApplication::primaryScreen();
 
     auto* console = new ConsoleWidget();
-    console->setWindowFlags(Qt::Window | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);
-    console->setCursor(Qt::BlankCursor);
-    console->setFocusPolicy(Qt::StrongFocus);
 
-    console->showFullScreen();
+    if (options.fullscreen) {
+        console->setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
+        if (targetScreen)
+            console->move(targetScreen->geometry().topLeft());
+        console->showFullScreen();
+    } else if (options.windowed) {
+        if (targetScreen)
+            console->setGeometry(targetScreen->availableGeometry());
+        console->show();
+    } else {
+        if (targetScreen)
+            console->setGeometry(targetScreen->availableGeometry());
+        console->showMaximized();
+    }
+
     console->activateWindow();
     console->raise();
     console->setFocus();
-
-    const QStringList args = QCoreApplication::arguments();
-    const QString scriptPath = getScriptArg(args);
-    const QString resourceName = getResourceArg(args);
+    console->setCursor(Qt::BlankCursor);
 
     pc::Script script;
     try {
-        if (!scriptPath.isEmpty()) {
-            qDebug() << "PulseConsole: loading script from file:" << scriptPath;
-            script = pc::ScriptLoader::loadFromFile(scriptPath);
-        } else if (!resourceName.isEmpty()) {
-            const QString rp = QString(":/scripts/%1").arg(resourceName);
-            qDebug() << "PulseConsole: loading script from resources:" << rp;
-            script = pc::ScriptLoader::loadFromResource(rp);
+        if (!scriptFile.isEmpty()) {
+            script = pc::ScriptLoader::loadFromFile(scriptFile);
         } else {
-            qDebug() << "PulseConsole: loading default script from resources";
             script = pc::ScriptLoader::loadFromResource(":/scripts/default.yaml");
         }
-
-        qDebug() << "PulseConsole: script loaded. steps =" << static_cast<int>(script.steps.size());
     } catch (const std::exception& e) {
-        qDebug() << "PulseConsole: script load failed:" << e.what();
-        console->appendLine("PulseConsole");
+        std::cerr << "pulse-console: script load failed: " << e.what() << std::endl;
+        console->appendLine("pulse-console");
         console->appendLine("ERROR: Failed to load script.");
         console->appendLine(QString::fromUtf8(e.what()));
         console->appendLine("");
@@ -92,7 +86,9 @@ int main(int argc, char* argv[]) {
     }
 
     auto* engine = new pc::Engine(console, &app);
-    engine->start(script);
 
+    std::cout << "CYBERSHOW_STATUS RUNNING" << std::endl;
+
+    engine->start(script);
     return app.exec();
 }
