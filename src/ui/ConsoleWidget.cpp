@@ -223,6 +223,10 @@ void ConsoleWidget::rebuildOverlays() {
 
 void ConsoleWidget::keyPressEvent(QKeyEvent* event) {
     if (!event) return;
+    if (event->key() == Qt::Key_F11) {
+        isFullScreen() ? showNormal() : showFullScreen();
+        return;
+    }
     emit keyPressed(event->key());
     QWidget::keyPressEvent(event);
 }

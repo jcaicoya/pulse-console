@@ -59,8 +59,8 @@ int main(int argc, char* argv[]) {
         console->show();
     } else {
         if (targetScreen)
-            console->setGeometry(targetScreen->availableGeometry());
-        console->showMaximized();
+            console->move(targetScreen->geometry().topLeft());
+        console->showFullScreen();
     }
 
     console->activateWindow();
