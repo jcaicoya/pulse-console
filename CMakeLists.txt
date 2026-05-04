@@ -14,15 +14,29 @@ find_package(Qt6 COMPONENTS
         Widgets
         REQUIRED)
 
-include(FetchContent)
+# yaml-cpp: build directly from source, bypassing its own CMakeLists.txt.
+# yaml-cpp 0.8.0 uses cmake_minimum_required(VERSION 2.8.12) which CMake 4.x
+# rejects. We clone the sources once and compile them manually.
+set(_yaml_src "${CMAKE_BINARY_DIR}/_deps/yaml_cpp-src")
 
-# yaml-cpp
-FetchContent_Declare(
-        yaml_cpp
-        GIT_REPOSITORY https://github.com/jbeder/yaml-cpp.git
-        GIT_TAG        0.8.0
-)
-FetchContent_MakeAvailable(yaml_cpp)
+if (NOT EXISTS "${_yaml_src}/include/yaml-cpp/yaml.h")
+    message(STATUS "Fetching yaml-cpp 0.8.0...")
+    execute_process(
+        COMMAND git clone --depth 1 --branch 0.8.0
+                https://github.com/jbeder/yaml-cpp.git "${_yaml_src}"
+        RESULT_VARIABLE _yaml_clone_result
+        OUTPUT_QUIET ERROR_QUIET
+    )
+    if (NOT _yaml_clone_result EQUAL 0)
+        message(FATAL_ERROR "Failed to clone yaml-cpp. Make sure git is on PATH.")
+    endif()
+endif()
+
+file(GLOB_RECURSE _yaml_sources "${_yaml_src}/src/*.cpp")
+add_library(yaml-cpp STATIC ${_yaml_sources})
+target_include_directories(yaml-cpp PUBLIC "${_yaml_src}/include")
+target_compile_definitions(yaml-cpp PUBLIC YAML_CPP_STATIC_DEFINE)
+add_library(yaml-cpp::yaml-cpp ALIAS yaml-cpp)
 
 add_executable(PulseConsole
         src/main.cpp
