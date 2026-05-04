@@ -1,199 +1,146 @@
 # PulseConsole
 
-PulseConsole is a fullscreen, stage-ready console presentation engine
-built with **C++23**, **Qt 6 (Widgets)**, and **yaml-cpp**.
+Fullscreen, stage-ready console presentation engine for **Bajo Ataque** and similar live shows.
+Built with **C++23**, **Qt 6.7.3 (Widgets)**, and **yaml-cpp**.
 
-It executes scripted console sequences defined in YAML, supporting:
+Executes scripted console sequences from YAML files with typewriter animation, timed pauses,
+dynamic style changes, and CRT visual effects. Designed to run on a projector screen under
+orchestrator control or standalone.
 
--   Typewriter text animation
--   Timed waits
--   Screen clearing
--   Dynamic style changes (color, size, alignment)
--   Pause-until-key interaction
--   Fullscreen, frameless, always-on-top display
-
-Designed for live demos, tech shows, and controlled stage environments.
-
-------------------------------------------------------------------------
+---
 
 ## Features
 
--   YAML-based scripting language
--   Clean separation of responsibilities:
-   -   `ScriptLoader` → YAML parsing
-   -   `Engine` → Execution logic
-   -   `ConsoleWidget` → Rendering
--   Non-blocking execution using `QTimer`
--   Typewriter effect with configurable character delay
--   Pause on specific key (e.g., `"Space"`)
--   Frameless fullscreen window
--   Always-on-top window mode
--   Only closable via **Alt+F4** (stage safety)
+- YAML-based scripting (external file or embedded resource)
+- Typewriter effect with configurable character delay
+- Timed waits, screen clear, style changes, pause-until-key
+- CRT effects: scanlines, vignette, glow, flicker
+- Fullscreen frameless window, always-on-top, hidden cursor
+- Multi-screen support via `--screen <index>`
+- Cybershow orchestrator integration (`CYBERSHOW_STATUS` protocol, `--live` / `--demo` modes)
+- Only closable via **Alt+F4** — stage safety
 
-------------------------------------------------------------------------
+---
 
 ## Project Structure
 
-    src/
-     ├── main.cpp
-     ├── ui/
-     │    ├── ConsoleWidget.h
-     │    └── ConsoleWidget.cpp
-     └── engine/
-          ├── Steps.h
-          ├── ScriptLoader.h
-          ├── ScriptLoader.cpp
-          ├── Engine.h
-          └── Engine.cpp
-
-    resources/
-     ├── pulseconsole.qrc
-     └── scripts/
-          └── default.yaml
-
-------------------------------------------------------------------------
-
-## Script Format (YAML)
-
-Example:
-
-``` yaml
-defaults:
-  style: { color: "#00ff00", size: 20, alignH: left, alignV: top }
-  type:  { charDelay: 0.02 }
-
-steps:
-  - write: "Hello, World!"
-  - wait: 1.0
-  - clear: {}
-  - write: "Here we go"
-  - wait: 1.0
-  - clear: {}
-  - set_style: { color: "#ff0000", size: 50, alignH: center, alignV: middle }
-  - write: "Alert!"
-  - pause_until_key: { key: "Space" }
-  - clear: {}
-  - set_style: { color: "#ffffff", size: 20, alignH: left, alignV: top }
-  - write: "Bye"
+```
+pulse-console/
+├── src/
+│   ├── main.cpp
+│   ├── engine/
+│   │   ├── Steps.h           # Script data structures (std::variant step types)
+│   │   ├── ScriptLoader.h/cpp
+│   │   └── Engine.h/cpp      # Execution state machine (Idle/Writing/Waiting/Paused)
+│   └── ui/
+│       └── ConsoleWidget.h/cpp  # Qt widget with CRT rendering
+├── resources/
+│   ├── pulseconsole.qrc
+│   └── scripts/
+│       ├── default.yaml         # Embedded fallback script
+│       └── second_screen.yaml
+├── scripts/                     # Show scripts (loaded at runtime)
+│   ├── apertura.yaml            # Opening sequence ("BAJO ATAQUE")
+│   └── cierre.yaml              # Closing sequence ("Gracias")
+├── CMakeLists.txt
+└── README.md
 ```
 
-### Supported Steps
-
-Step                Description
-  ------------------- ---------------------------------------
-`write`             Writes text using typewriter effect
-`wait`              Waits given seconds
-`clear`             Clears the screen
-`set_style`         Changes color, size, alignment
-`pause_until_key`   Waits until a specific key is pressed
-
-### Alignment Options
-
--   `alignH`: `left`, `center`, `right`
--   `alignV`: `top`, `middle`, `bottom`
-
-### Keys for `pause_until_key`
-
-Supported values: - `"Space"` - `"Enter"` - `"Return"` - `"Any"` -
-Single characters (`"A"`, `"q"`, etc.)
-
-------------------------------------------------------------------------
+---
 
 ## Running the Application
 
 ### Default (embedded script)
 
-Runs the embedded resource script:
+```
+PulseConsole.exe
+```
 
-    PulseConsole.exe
+### External script
 
-------------------------------------------------------------------------
+```
+PulseConsole.exe --file scripts\apertura.yaml
+PulseConsole.exe --file=scripts\apertura.yaml
+```
 
-### Load Script from File
+### Display options
 
-You can load an external YAML script:
+| Flag | Effect |
+|---|---|
+| *(none)* | Maximized window |
+| `--fullscreen` | Frameless fullscreen |
+| `--windowed` | Resizable window |
+| `--screen <n>` | Target screen index (0 = primary) |
 
-    PulseConsole.exe --script path\to\script.yaml
+### Orchestrator launch modes
 
-Or:
+| Flag | Meaning |
+|---|---|
+| `--live` | Live show mode |
+| `--demo` | Rehearsal/demo mode |
 
-    PulseConsole.exe --script=path\to\script.yaml
+The orchestrator may also pass `--show` or `--design`; these are normalized internally.
 
-If no `--script` argument is provided, the embedded resource is used.
+---
 
-------------------------------------------------------------------------
+## Script Format (YAML)
+
+```yaml
+defaults:
+  style: { color: "#00ff00", size: 22, alignH: left, alignV: top }
+  type:  { charDelay: 0.03 }
+
+steps:
+  - write: "Iniciando módulos..."
+  - wait: 1.2
+  - set_style: { color: "#ff4444", size: 64, alignH: center, alignV: middle }
+  - write: "BAJO ATAQUE"
+  - clear: {}
+  - pause_until_key: { key: "Space" }
+```
+
+### Step reference
+
+| Step | Fields | Description |
+|---|---|---|
+| `write` | text (string) | Outputs text with typewriter effect; `\n` for newline |
+| `wait` | seconds (float) | Timed pause |
+| `clear` | *(empty map)* | Clears the screen |
+| `set_style` | `color`, `size`, `alignH`, `alignV` | Changes current style (all optional) |
+| `pause_until_key` | `key` | Blocks until the specified key is pressed |
+
+### Alignment
+
+- `alignH`: `left` `center` `right`
+- `alignV`: `top` `middle` `bottom`
+
+### Keys for `pause_until_key`
+
+`"Space"` `"Enter"` `"Return"` `"Any"` or a single character (`"A"`, `"q"`, etc.)
+
+---
+
+## Build
+
+```powershell
+cmake -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build --config Release
+```
+
+Requirements: Windows 11, MSVC 2022, Qt 6.7.3 (Widgets), CMake. `yaml-cpp` is fetched
+automatically via `FetchContent`.
+
+---
 
 ## Stage Safety
 
--   Window is **frameless**
--   Window is **always on top**
--   Mouse cursor is hidden
--   `Esc` and `Q` do NOT close the app
--   Only **Alt+F4** closes the application
+- Frameless, always-on-top, hidden cursor
+- `Esc` and `Q` do **not** close the app
+- Only **Alt+F4** closes the application
+- Windows system dialogs (UAC, Ctrl+Alt+Del) cannot be suppressed
 
-Note: Windows system dialogs (UAC, Ctrl+Alt+Del) cannot be overridden.
-
-------------------------------------------------------------------------
-
-## Build Requirements
-
--   Windows 11
--   MSVC 2022
--   Qt 6.7.3 (Widgets)
--   CMake
--   yaml-cpp (via FetchContent)
-
-CMake must include:
-
-    set(CMAKE_AUTOMOC ON)
-    set(CMAKE_AUTORCC ON)
-    set(CMAKE_AUTOUIC ON)
-
-And:
-
-    target_link_libraries(PulseConsole
-        PRIVATE
-            Qt6::Widgets
-            yaml-cpp::yaml-cpp
-    )
-
-------------------------------------------------------------------------
-
-## Development Notes
-
--   Line endings normalized to LF via `.gitattributes`
--   Includes configured using:
-
-```{=html}
-<!-- -->
-```
-    target_include_directories(PulseConsole
-        PRIVATE
-            ${CMAKE_SOURCE_DIR}/src
-    )
-
--   Engine is single-threaded and event-driven
--   No blocking calls
--   Designed for predictable live execution
-
-------------------------------------------------------------------------
-
-## Future Ideas
-
--   Blinking cursor
--   Neon glow / CRT effect
--   Multiple scenes support
--   Script include/import
--   Loop constructs
--   Timeline visualizer
--   Kiosk mode
-
-------------------------------------------------------------------------
+---
 
 ## License
 
-MIT License
-
-------------------------------------------------------------------------
-
-PulseConsole is part of the Cybershow project.
+MIT — part of the Cybershow / Bajo Ataque project.

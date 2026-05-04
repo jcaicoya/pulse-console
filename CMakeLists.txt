@@ -40,18 +40,16 @@ add_library(yaml-cpp::yaml-cpp ALIAS yaml-cpp)
 
 add_executable(pulse_console
         src/main.cpp
+        src/CyberAppMode.cpp
         src/ui/ConsoleWidget.cpp
         src/engine/ScriptLoader.cpp
         src/engine/Engine.cpp
         resources/pulseconsole.qrc
-        ../cybershow_app_standards_v0_3/common/CyberAppMode.h
-        ../cybershow_app_standards_v0_3/common/CyberAppMode.cpp
 )
 
 target_include_directories(pulse_console
         PRIVATE
         ${CMAKE_SOURCE_DIR}/src
-        ${CMAKE_SOURCE_DIR}/../cybershow_app_standards_v0_3/common
 )
 
 target_link_libraries(pulse_console
