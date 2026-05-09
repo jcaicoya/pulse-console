@@ -1,0 +1,11 @@
+{
+  "releases": [
+    {
+      "version": 0,
+      "commit": "f3363c3",
+      "date": "2026-05-04T20:42:56",
+      "message": "Fix fullscreen mode",
+      "zip": "pulse-console-v00.zip"
+    }
+  ]
+}
