@@ -23,3 +23,8 @@ ui_*.h
 
 # FetchContent (sometimes ends up here depending on config)
 _CMakeFetchContent/
+
+# Local tooling / generated dirs
+.claude/
+dist/
+memory/
