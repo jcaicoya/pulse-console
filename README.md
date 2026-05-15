@@ -25,7 +25,7 @@ orchestrator control or standalone.
 ## Project Structure
 
 ```
-pulse-console/
+pulse_console/
 ├── src/
 │   ├── main.cpp
 │   ├── engine/

@@ -26,5 +26,6 @@ _CMakeFetchContent/
 
 # Local tooling / generated dirs
 .claude/
+.release-cache/
 dist/
 memory/

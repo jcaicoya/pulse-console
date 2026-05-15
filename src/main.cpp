@@ -11,7 +11,7 @@
 
 int main(int argc, char* argv[]) {
     QApplication app(argc, argv);
-    app.setApplicationName("pulse-console");
+    app.setApplicationName("under_attack_pulse_console");
 
     // Extract --file before parseAppLaunchOptions (unknown flags are hard errors).
     QStringList args = app.arguments();
@@ -33,7 +33,7 @@ int main(int argc, char* argv[]) {
 
     const cybershow::ParseResult parseResult = cybershow::parseAppLaunchOptions(args);
     if (!parseResult.ok) {
-        std::cerr << "pulse-console: " << parseResult.error.toStdString() << std::endl;
+        std::cerr << "under_attack_pulse_console: " << parseResult.error.toStdString() << std::endl;
         return 1;
     }
 
@@ -76,8 +76,8 @@ int main(int argc, char* argv[]) {
             script = pc::ScriptLoader::loadFromResource(":/scripts/default.yaml");
         }
     } catch (const std::exception& e) {
-        std::cerr << "pulse-console: script load failed: " << e.what() << std::endl;
-        console->appendLine("pulse-console");
+        std::cerr << "under_attack_pulse_console: script load failed: " << e.what() << std::endl;
+        console->appendLine("under_attack_pulse_console");
         console->appendLine("ERROR: Failed to load script.");
         console->appendLine(QString::fromUtf8(e.what()));
         console->appendLine("");

@@ -21,7 +21,7 @@ via command-line flags and reads `CYBERSHOW_STATUS` lines from its stdout.
 ## 2. Repository Layout
 
 ```
-pulse-console/
+pulse_console/
 ├── CMakeLists.txt
 ├── README.md
 ├── CLAUDE.md                    # This file

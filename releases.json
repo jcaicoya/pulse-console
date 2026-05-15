@@ -20,6 +20,13 @@
       "date": "2026-05-10T20:27:44",
       "message": "Ignore local tool directories",
       "zip": "bajo-ataque-pulse-console-v02.zip"
+    },
+    {
+      "version": 3,
+      "commit": "891fb9c",
+      "date": "2026-05-15T16:41:56",
+      "message": "Package v02",
+      "zip": "bajo-ataque-under_attack_pulse_console-v03.zip"
     }
   ]
 }
