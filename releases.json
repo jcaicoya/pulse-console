@@ -27,6 +27,13 @@
       "date": "2026-05-15T16:41:56",
       "message": "Package v02",
       "zip": "bajo-ataque-under_attack_pulse_console-v03.zip"
+    },
+    {
+      "version": 4,
+      "commit": "f86630c",
+      "date": "2026-05-15T16:50:21",
+      "message": "Align pulse console naming and packaging",
+      "zip": "bajo-ataque-under_attack_pulse_console-v04.zip"
     }
   ]
 }
