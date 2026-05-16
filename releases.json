@@ -34,6 +34,13 @@
       "date": "2026-05-15T16:50:21",
       "message": "Align pulse console naming and packaging",
       "zip": "bajo-ataque-under_attack_pulse_console-v04.zip"
+    },
+    {
+      "version": 5,
+      "commit": "5edfbad",
+      "date": "2026-05-16T10:40:14",
+      "message": "Mark blinking cursor step as done in NEXT_STEPS.md",
+      "zip": "bajo-ataque-under_attack_pulse_console-v05.zip"
     }
   ]
 }
