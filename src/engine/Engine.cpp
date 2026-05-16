@@ -159,10 +159,12 @@ void Engine::startNextStep() {
             applyStyle(m_currentStyle);
             startNextStep();
         } else if constexpr (std::is_same_v<T, PauseUntilKeyStep>) {
-            // Pause until a key is pressed (or a specific key).
             m_timer.stop();
             m_mode = Mode::Paused;
             m_expectedQtKey = parseExpectedQtKey(s.key);
+        } else if constexpr (std::is_same_v<T, ShowCursorStep>) {
+            if (m_console) m_console->setCursorEnabled(s.visible);
+            startNextStep();
         }
     }, step);
 }

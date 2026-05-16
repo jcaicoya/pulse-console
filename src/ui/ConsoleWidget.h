@@ -40,6 +40,7 @@ public:
     void setText(const QString& text);
     void appendText(const QString& text);
     void appendLine(const QString& line);
+    void setCursorEnabled(bool enabled);
 
 signals:
     void keyPressed(int qtKey);
@@ -59,6 +60,10 @@ private:
 
     QTimer  m_flickerTimer;
     double  m_flickerFactor = 1.0;
+
+    QTimer  m_cursorTimer;
+    bool    m_cursorEnabled = false;
+    bool    m_cursorVisible = false;
 
     QStringList m_lines{};
     QString     m_currentLine{};

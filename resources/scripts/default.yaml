@@ -3,12 +3,14 @@ defaults:
   type:  { charDelay: 0.02 }
 
 steps:
+  - show_cursor: true
   - write: "Hello, World!"
-  - wait: 1.0
+  - wait: 2.0
   - clear: {}
   - write: "Here we go"
   - wait: 1.0
   - clear: {}
+  - show_cursor: false
   - set_style: { color: "#ff0000", size: 50, alignH: center, alignV: middle }
   - write: "Alert!"
   - pause_until_key: { key: "Space" }

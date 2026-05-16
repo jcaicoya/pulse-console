@@ -39,7 +39,11 @@ namespace pc {
         QString key; // e.g. "Space", "Enter"
     };
 
-    using Step = std::variant<WriteStep, WaitStep, ClearStep, SetStyleStep, PauseUntilKeyStep>;
+    struct ShowCursorStep {
+        bool visible = true;
+    };
+
+    using Step = std::variant<WriteStep, WaitStep, ClearStep, SetStyleStep, PauseUntilKeyStep, ShowCursorStep>;
 
     struct ScriptDefaults {
         Style style{};

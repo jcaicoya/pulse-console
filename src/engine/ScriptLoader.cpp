@@ -129,6 +129,13 @@ static Step parseOneStep(const YAML::Node& stepNode) {
         return PauseUntilKeyStep{QString::fromStdString(k.as<std::string>())};
     }
 
+    if (key == "show_cursor") {
+        if (!value || !value.IsScalar()) {
+            throw std::runtime_error("show_cursor step must be a boolean (true or false)");
+        }
+        return ShowCursorStep{value.as<bool>()};
+    }
+
     throw std::runtime_error("Unknown step type: " + key);
 }
 

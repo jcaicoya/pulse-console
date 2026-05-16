@@ -37,6 +37,15 @@ ConsoleWidget::ConsoleWidget(QWidget* parent)
 
     if (m_effects.flickerStrength > 0.0)
         m_flickerTimer.start(150);
+
+    m_cursorTimer.setSingleShot(false);
+    connect(&m_cursorTimer, &QTimer::timeout, this, [this]() {
+        if (m_cursorEnabled) {
+            m_cursorVisible = !m_cursorVisible;
+            update();
+        }
+    });
+    m_cursorTimer.start(500);
 }
 
 void ConsoleWidget::setEffects(const Effects& effects) {
@@ -89,6 +98,12 @@ void ConsoleWidget::appendText(const QString& text) {
 void ConsoleWidget::appendLine(const QString& line) {
     appendText(line);
     appendText("\n");
+}
+
+void ConsoleWidget::setCursorEnabled(bool enabled) {
+    m_cursorEnabled = enabled;
+    m_cursorVisible = enabled;
+    update();
 }
 
 QRect ConsoleWidget::computeTextRect(const QSize& textSize) const {
@@ -179,6 +194,16 @@ void ConsoleWidget::paintEvent(QPaintEvent* event) {
         }
     }
 
+    if (m_cursorVisible) {
+        const qsizetype lastIdx = endIndexExclusive - 1;
+        const QString& lastLine = (lastIdx < storedCount)
+                                  ? m_lines[static_cast<int>(lastIdx)]
+                                  : m_currentLine;
+        const int cursorX = x0 + fm.horizontalAdvance(lastLine);
+        const int cursorY = targetRect.top() + static_cast<int>(visibleCount - 1) * lineHeight;
+        painter.fillRect(QRect(cursorX, cursorY, fm.averageCharWidth(), lineHeight), baseColor);
+    }
+
     if (m_effects.scanlines && !m_scanlinesCache.isNull())
         painter.drawPixmap(0, 0, m_scanlinesCache);
     if (m_effects.vignette && !m_vignetteCache.isNull())
@@ -224,6 +249,7 @@ void ConsoleWidget::rebuildOverlays() {
 
 void ConsoleWidget::closeEvent(QCloseEvent* event) {
     m_flickerTimer.stop();
+    m_cursorTimer.stop();
     event->accept();
 }
 
