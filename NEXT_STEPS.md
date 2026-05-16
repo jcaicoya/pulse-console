@@ -4,7 +4,7 @@ Ordered by priority. Mark steps as done with `[x]` and commit at least once per 
 
 ## Pending
 
-- [ ] **Blinking cursor** — a blinking block or underscore after the last character.
+- [x] **Blinking cursor** — a blinking block or underscore after the last character.
 - [ ] **Loop step** — repeat a block of steps N times or indefinitely (useful for idle loops).
 - [ ] **Sound support** — `play_sound: { file: "..." }` step using `QMediaPlayer`.
 - [ ] **Script include** — `include: other.yaml` to compose scripts from reusable fragments.
