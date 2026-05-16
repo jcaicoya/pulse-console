@@ -41,6 +41,13 @@
       "date": "2026-05-16T10:40:14",
       "message": "Mark blinking cursor step as done in NEXT_STEPS.md",
       "zip": "bajo-ataque-under_attack_pulse_console-v05.zip"
+    },
+    {
+      "version": 6,
+      "commit": "d5785a1",
+      "date": "2026-05-16T17:36:59",
+      "message": "Store Qt release archives at dist root",
+      "zip": "pulse_console_v06.zip"
     }
   ]
 }
