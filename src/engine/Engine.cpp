@@ -56,6 +56,11 @@ Engine::Engine(ConsoleWidget* console, QObject* parent)
     }
 }
 
+void Engine::stop() {
+    m_timer.stop();
+    m_mode = Mode::Idle;
+}
+
 void Engine::start(const Script& script) {
     m_script = script;
     m_stepIndex = 0;

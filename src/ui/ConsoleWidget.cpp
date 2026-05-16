@@ -2,6 +2,7 @@
 
 #include <QPainter>
 #include <QPaintEvent>
+#include <QCloseEvent>
 #include <QFontMetrics>
 #include <QKeyEvent>
 #include <QRadialGradient>
@@ -219,6 +220,11 @@ void ConsoleWidget::rebuildOverlays() {
         p.fillRect(QRect(0, 0, r.width(), r.height()), grad);
         m_vignetteCache = std::move(pm);
     }
+}
+
+void ConsoleWidget::closeEvent(QCloseEvent* event) {
+    m_flickerTimer.stop();
+    event->accept();
 }
 
 void ConsoleWidget::keyPressEvent(QKeyEvent* event) {

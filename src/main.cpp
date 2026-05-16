@@ -89,6 +89,11 @@ int main(int argc, char* argv[]) {
 
     std::cout << "CYBERSHOW_STATUS RUNNING" << std::endl;
 
+    QObject::connect(&app, &QApplication::aboutToQuit, [engine]() {
+        engine->stop();
+        std::cout << "CYBERSHOW_STATUS FINISHED" << std::endl;
+    });
+
     engine->start(script);
     return app.exec();
 }

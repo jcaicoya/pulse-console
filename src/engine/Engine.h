@@ -18,6 +18,7 @@ namespace pc {
         explicit Engine(ConsoleWidget* console, QObject* parent = nullptr);
 
         void start(const Script& script);
+        void stop();
 
     private slots:
         void onTick();
