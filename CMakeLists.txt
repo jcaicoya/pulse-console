@@ -48,7 +48,7 @@ add_executable(under_attack_pulse_console
 )
 
 target_include_directories(under_attack_pulse_console
-        PRIVATELas a
+        PRIVATE
         ${CMAKE_SOURCE_DIR}/src
 )
 
