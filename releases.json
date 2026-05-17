@@ -48,6 +48,13 @@
       "date": "2026-05-16T17:36:59",
       "message": "Store Qt release archives at dist root",
       "zip": "pulse_console_v06.zip"
+    },
+    {
+      "version": 7,
+      "commit": "5a54620",
+      "date": "2026-05-17T11:58:59",
+      "message": "Standardize project docs",
+      "zip": "pulse_console_v07.zip"
     }
   ]
 }
