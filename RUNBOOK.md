@@ -1,116 +1,79 @@
 # PulseConsole — Operator Runbook
 
-Operational guide for running PulseConsole during the **Bajo Ataque** live show.
+## Scripts del show
 
----
-
-## Show Scripts
-
-| Script | File | Purpose |
+| Script | Archivo | Propósito |
 |---|---|---|
-| Apertura | `scripts/apertura.yaml` | Opening — simulates a cyber attack, ends with "BAJO ATAQUE" |
-| Cierre | `scripts/cierre.yaml` | Closing — cleanup sequence, ends with "Gracias" |
+| Apertura | `scripts/apertura.yaml` | secuencia inicial |
+| Cierre | `scripts/cierre.yaml` | secuencia final |
 
----
+## Arranque desde Orchestrator
 
-## Launching from the Orchestrator
+El orchestrator puede lanzar PulseConsole automáticamente con los flags y el script correctos.
 
-The orchestrator launches PulseConsole automatically when you activate an apertura or cierre
-scene. No manual steps needed — the orchestrator passes the correct `--file` and `--screen`
-flags and monitors the app status.
+## Arranque manual
 
----
-
-## Launching Manually
-
-From the package root directory (where `PulseConsole.exe` lives):
+Desde la raíz del paquete:
 
 ```powershell
-# Apertura on secondary screen (index 1), fullscreen
 .\PulseConsole.exe --file scripts\apertura.yaml --screen 1 --fullscreen
-
-# Cierre on secondary screen (index 1), fullscreen
 .\PulseConsole.exe --file scripts\cierre.yaml --screen 1 --fullscreen
-
-# Test on primary screen, windowed
 .\PulseConsole.exe --file scripts\apertura.yaml --windowed
 ```
 
----
+## Flags de pantalla
 
-## Display Flags
-
-| Flag | Effect |
+| Flag | Efecto |
 |---|---|
-| `--fullscreen` | Frameless fullscreen on target screen |
-| `--windowed` | Resizable window (for testing) |
-| *(none)* | Maximized window |
-| `--screen 0` | Primary screen |
-| `--screen 1` | Secondary screen / projector |
+| `--fullscreen` | fullscreen sin bordes |
+| `--windowed` | ventana redimensionable |
+| sin flag | ventana maximizada |
+| `--screen 0` | pantalla principal |
+| `--screen 1` | pantalla secundaria / proyector |
 
----
+## Durante el show
 
-## During the Show
+- la app ejecuta la secuencia de forma autónoma
+- si hay un `pause_until_key`, hay que pulsar la tecla indicada
+- el cursor está oculto
+- `Esc` y `Q` no cierran la app
+- para cerrar: `Alt+F4`
 
-- The app runs autonomously — text appears at scripted timing.
-- `pause_until_key` steps stop and wait; press the configured key to continue.
-- The mouse cursor is hidden. Move the mouse to confirm the window has focus if needed.
-- **Do not press Esc or Q** — they are intentionally disabled to prevent accidental close.
-- To close: **Alt+F4**.
+## Si algo falla
 
----
+### Error visible en pantalla
 
-## If Something Goes Wrong
+1. comprobar ruta del script
+2. comprobar sintaxis YAML
+3. corregir y relanzar
 
-### App shows an error message on screen
+### La app aparece en la pantalla equivocada
 
-The script file failed to load or parse. Read the error on screen, then:
-1. Check the `--file` path is correct and the file exists.
-2. Open the YAML file and look for syntax errors (bad indentation, missing quotes, invalid color).
-3. Fix the script and relaunch.
+Revisar el índice de `--screen`.
 
-### App opens on the wrong screen
+### La app parece congelada
 
-The `--screen` index is wrong. Check:
-```powershell
-# List screens and indices (run in orchestrator or any Qt app)
-# Screen 0 = primary, Screen 1 = secondary (projector)
-```
-Pass the correct `--screen <n>` flag.
+Probablemente está esperando un `pause_until_key`. Dar foco a la ventana y pulsar la tecla esperada.
 
-### App window is behind other windows
+### El script termina y la pantalla queda fija
 
-Click the taskbar button, or use `Alt+Tab` to bring it forward. For fullscreen mode, the app
-is always-on-top so this should not happen unless another always-on-top window is competing.
+Es normal. La app permanece abierta mostrando el último frame hasta cerrar con `Alt+F4`.
 
-### App is frozen / not advancing
+## Edición de scripts
 
-A `pause_until_key` step is waiting for input. Click the app window to give it focus, then
-press the expected key (e.g., `Space`). If the script uses `pause_until_key: { key: "Any" }`,
-press any key.
+Los scripts están en `scripts/` y usan YAML.
 
-### Script ends and screen goes black
-
-This is normal — the app stays open showing the last frame after the script finishes.
-Close with **Alt+F4** when done.
-
----
-
-## Editing Show Scripts
-
-Scripts are plain YAML files in `scripts/`. Edit with any text editor.
-
-### Quick reference
+Ejemplo mínimo:
 
 ```yaml
 defaults:
   style: { color: "#00ff00", size: 22, alignH: left, alignV: top }
-  type:  { charDelay: 0.03 }   # seconds between characters
+  type:  { charDelay: 0.03 }
 
 steps:
-  - write: "Line of text"        # typewriter output
-  - wait: 1.5                    # pause in seconds
-  - clear: {}                    # clear screen
+  - write: "Line of text"
+  - wait: 1.5
+  - clear: {}
   - set_style:
       color: "#ff4444"
       size: 64
@@ -119,40 +82,26 @@ steps:
   - pause_until_key: { key: "Space" }
 ```
 
-### Color values
+### Colores habituales
 
-Use `#RRGGBB` hex format. Common show colors:
-
-| Color | Hex | Meaning |
+| Color | Hex | Uso |
 |---|---|---|
-| Green | `#00ff00` | Normal / system output |
-| Amber | `#ffaa00` | Warning |
-| Red | `#ff4444` | Alert / attack |
-| White | `#ffffff` | End / neutral |
+| Verde | `#00ff00` | salida normal |
+| Ámbar | `#ffaa00` | aviso |
+| Rojo | `#ff4444` | alerta |
+| Blanco | `#ffffff` | cierre o neutro |
 
-### Tips
-
-- `write` supports `\n` for line breaks within a single step.
-- `set_style` only changes the fields you specify — others keep their current value.
-- Test scripts with `--windowed` before using them live.
-- Keep scripts short — long sequences are hard to interrupt if something goes wrong.
-
----
-
-## Adding a New Script
-
-1. Create a new `.yaml` file in `scripts/`.
-2. Test it: `.\PulseConsole.exe --file scripts\new_script.yaml --windowed`
-3. If used by the orchestrator, add it to `config/apps.json` with the `--file` argument.
-
----
-
-## Build (for developers)
+## Build y release
 
 ```powershell
 cmake -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build --config Release
-# Output: build\Release\PulseConsole.exe
 ```
 
-After building, copy the new exe into the package and run `windeployqt` if Qt DLLs changed.
+Si hace falta generar paquete de distribución, usar el flujo del proyecto correspondiente.
+
+## Consideraciones operativas
+
+- solo `Alt+F4` debe cerrar la app
+- los errores de script deben verse en pantalla
+- la app no debe quedarse en negro sin feedback
